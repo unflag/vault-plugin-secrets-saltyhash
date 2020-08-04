@@ -2,6 +2,8 @@
 
 This is standalone backend plugin for use with [Hashicorp Vault](https://www.github.com/hashicorp/vault).
 This plugin allows on-demand hashing data with configured salt.
+Basically, it's [Transit Plugin](https://www.vaultproject.io/docs/secrets/transit)
+or [sys/tools/hash endpoint](https://www.vaultproject.io/api-docs/system/tools#hash-data) derivative with role-based salt.
 
 ## Quick Links
     - Vault Website: https://www.vaultproject.io
@@ -28,7 +30,7 @@ $ tee /path/to/vault/conf/vault.hcl <<EOF
 
 * Build plugin:
 ```sh
-$ go build cmd/saltyhash/main.go  -o /path/to/vault/plugins/vault-secrets-saltyhash
+$ cd cmd/saltyhash/ && go build -o /path/to/vault/plugins/vault-secrets-saltyhash
 ```
 
 * Register plugin in vault catalog:
