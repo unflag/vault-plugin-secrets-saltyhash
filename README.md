@@ -50,7 +50,7 @@ Success! Enabled the vault-secrets-saltyhash secrets engine at: saltyhash/
 
 * Configure role with associated salt:
 ```sh
-$ vault write saltyhash/roles/test salt=$(echo -n "secretsalt" | base64)
+$ vault write saltyhash/roles/test salt="$(echo -n "secretsalt" | base64)" mode="append"
 Success! Data written to: saltyhash/roles/test
 ```
 
@@ -86,3 +86,7 @@ Success! Disabled the secrets engine (if it existed) at: saltyhash/
 * sha2-512
 * sha3-256
 * sha3-512
+
+## Supported salt modes
+* append
+* prepend

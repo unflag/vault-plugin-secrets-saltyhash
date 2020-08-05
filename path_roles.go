@@ -16,11 +16,13 @@ const (
 
 type roleEntry struct {
 	Salt string `json:"salt" mapstructure:"salt"`
+	Mode string `json:"mode" mapstructure:"mode"`
 }
 
 func (r *roleEntry) ToResponseData() map[string]interface{} {
 	return map[string]interface{}{
 		"salt": r.Salt,
+		"mode": r.Mode,
 	}
 }
 
@@ -58,6 +60,12 @@ func (b *backend) pathRoles() *framework.Path {
 				Type:         framework.TypeString,
 				Description:  "Random base64-encoded string which will be used as an additional input to hash function",
 			},
+			"mode": {
+				Type:         framework.TypeString,
+				Description:  `Order of salt application. Valid values are:
+                * append
+                * prepend`,
+			},
 		},
 
 		Callbacks: map[logical.Operation]framework.OperationFunc{
@@ -77,6 +85,25 @@ func (b *backend) pathRoleCreateUpdate(ctx context.Context, req *logical.Request
 
 	entry := &roleEntry{
 		Salt: data.Get("salt").(string),
+		Mode: data.Get("mode").(string),
+	}
+
+	role, err := b.getRole(ctx, req.Storage, roleName)
+	if err != nil {
+		return nil, err
+	}
+
+	if role != nil {
+		if entry.Salt == "" {
+			entry.Salt = role.Salt
+		}
+		if entry.Mode == "" {
+			entry.Mode = role.Mode
+		}
+	}
+
+	if entry.Mode != "append" && entry.Mode != "prepend" {
+		return logical.ErrorResponse("invalid salt mode"), nil
 	}
 
 	lock := b.roleLock(roleName)

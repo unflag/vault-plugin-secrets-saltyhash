@@ -16,6 +16,7 @@ func TestSalty_Role(t *testing.T) {
 		Path:      "roles/" + testRoleName,
 		Data: map[string]interface{}{
 			"salt": testSalt,
+			"mode": "append",
 		},
 	})
 	if err != nil {
@@ -52,16 +53,17 @@ func TestSalty_Role(t *testing.T) {
 			t.Fatal("expected non-nil response")
 		}
 
-		if resp.IsError() {
-			t.Fatalf("bad: got error response: %#v", *resp)
-		}
-
-		salt, ok := resp.Data["salt"]
-		if !ok {
-			t.Fatal("no salt key found in returned data")
-		}
-		if salt.(string) != expected {
-			t.Fatalf("mismatched salts: %s != %s", salt.(string), expected)
+		if resp != nil {
+			if resp.IsError() {
+				t.Fatalf("bad: got error response: %#v", *resp)
+			}
+			salt, ok := resp.Data["salt"]
+			if !ok {
+				t.Fatal("no salt key found in returned data")
+			}
+			if salt.(string) != expected {
+				t.Fatalf("mismatched salts: %s != %s", salt.(string), expected)
+			}
 		}
 	}
 
@@ -72,6 +74,18 @@ func TestSalty_Role(t *testing.T) {
 	req.Operation = logical.UpdateOperation
 	req.Data = map[string]interface{}{
 		"salt": testUpdatedSalt,
+	}
+	doRequest(req, true, false, "")
+
+	// Test update role with invalid mode
+	req.Data = map[string]interface{}{
+		"mode": "foobar",
+	}
+	doRequest(req, false, true, "")
+
+	// Test update role with valid role
+	req.Data = map[string]interface{}{
+		"mode": "prepend",
 	}
 	doRequest(req, true, false, "")
 

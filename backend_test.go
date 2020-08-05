@@ -86,6 +86,7 @@ func testAccStepWriteRole(t *testing.T, roleName string, salt string) logicaltes
 		Path:      "roles/" + roleName,
 		Data: map[string]interface{}{
 			"salt": salt,
+			"mode": "append",
 		},
 	}
 

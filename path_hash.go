@@ -72,10 +72,19 @@ func (b *backend) pathHashWrite(ctx context.Context, req *logical.Request, d *fr
 	if err != nil || role == nil {
 		return logical.ErrorResponse(fmt.Sprintf("unable to find role %s: %s", roleName, err)), logical.ErrInvalidRequest
 	}
+	lock.RUnlock()
 
+	mode := role.Mode
 	salt, err := base64.StdEncoding.DecodeString(role.Salt)
 	if err != nil {
 		return logical.ErrorResponse(fmt.Sprintf("unable to decode salt as base64: %s", err)), logical.ErrInvalidRequest
+	}
+
+	switch mode {
+	case "append":
+		input = append(input, salt...)
+	case "prepend":
+		input = append(salt, input...)
 	}
 
 	var hf hash.Hash
@@ -94,7 +103,6 @@ func (b *backend) pathHashWrite(ctx context.Context, req *logical.Request, d *fr
 		return logical.ErrorResponse(fmt.Sprintf("unsupported algorithm %s", algorithm)), nil
 	}
 
-	input = append(input, salt...)
 	hf.Write(input)
 	retBytes := hf.Sum(nil)
 

@@ -18,6 +18,7 @@ func TestSalty_Hash(t *testing.T) {
 		Path:      "roles/" + testRoleName,
 		Data: map[string]interface{}{
 			"salt": testSalt,
+			"mode": "append",
 		},
 	})
 	if err != nil {
