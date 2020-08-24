@@ -62,8 +62,8 @@ func (b *backend) pathHashWrite(ctx context.Context, req *logical.Request, d *fr
 	algorithm := d.Get("algorithm").(string)
 
 	input, err := base64.StdEncoding.DecodeString(inputB64)
-	if err != nil {
-		return logical.ErrorResponse(fmt.Sprintf("unable to decode input as base64: %s", err)), logical.ErrInvalidRequest
+	if len(input) == 0 || err != nil {
+		return logical.ErrorResponse(fmt.Sprintf("input either empty or contains invalid base64: %s", err)), logical.ErrInvalidRequest
 	}
 
 	lock := b.roleLock(roleName)

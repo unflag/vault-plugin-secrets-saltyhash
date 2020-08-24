@@ -91,5 +91,7 @@ func TestSalty_Hash(t *testing.T) {
 	req.Data["input"] = "foobar"
 	doRequest(req, true, "")
 
+	req.Path = hashPath + "/sha3-512"
+	req.Data["input"] = ""
+	doRequest(req, true, "")
 }
-
