@@ -37,7 +37,7 @@ func TestSalty_Role(t *testing.T) {
 
 		if errExpected {
 			if err == nil && !resp.IsError() {
-				t.Fatalf("bad: got no error response when error expected")
+				t.Fatal("bad: got no error response when error expected")
 			}
 			return
 		}
@@ -77,6 +77,12 @@ func TestSalty_Role(t *testing.T) {
 	}
 	doRequest(req, true, false, "")
 
+	// Test update role with invalid parameter
+	req.Data = map[string]interface{}{
+		"foo": "bar",
+	}
+	doRequest(req, true, true, "")
+
 	// Test update role with invalid mode
 	req.Data = map[string]interface{}{
 		"mode": "foobar",
@@ -101,4 +107,3 @@ func TestSalty_Role(t *testing.T) {
 	req.Operation = logical.ReadOperation
 	doRequest(req, false, true, "")
 }
-

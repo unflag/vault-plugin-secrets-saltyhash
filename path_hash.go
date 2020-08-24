@@ -56,10 +56,17 @@ func (b *backend) pathHash() *framework.Path {
 	}
 }
 
-func (b *backend) pathHashWrite(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
-	roleName := d.Get("role_name").(string)
-	inputB64 := d.Get("input").(string)
-	algorithm := d.Get("algorithm").(string)
+func (b *backend) pathHashWrite(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	var err error
+
+	err = validateFieldSet(data)
+	if err != nil {
+		return logical.ErrorResponse(err.Error()), nil
+	}
+
+	roleName := data.Get("role_name").(string)
+	inputB64 := data.Get("input").(string)
+	algorithm := data.Get("algorithm").(string)
 
 	input, err := base64.StdEncoding.DecodeString(inputB64)
 	if len(input) == 0 || err != nil {

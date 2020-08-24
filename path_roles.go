@@ -2,6 +2,7 @@ package saltyhash
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/helper/locksutil"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -81,6 +82,12 @@ func (b *backend) pathRoles() *framework.Path {
 
 func (b *backend) pathRoleCreateUpdate(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 	var err error
+
+	err = validateFieldSet(data)
+	if err != nil {
+		return logical.ErrorResponse(err.Error()), nil
+	}
+
 	roleName := data.Get("role_name").(string)
 
 	entry := &roleEntry{
@@ -170,4 +177,23 @@ func (b *backend) getRole(ctx context.Context, s logical.Storage, n string) (*ro
 
 func (b *backend) roleLock(roleName string) *locksutil.LockEntry {
 	return locksutil.LockForKey(b.roleLocks, roleName)
+}
+
+func validateFieldSet(data *framework.FieldData) error {
+	var valid bool
+
+	for f1, _ := range data.Raw {
+		valid = false
+		for f2, _ := range data.Schema {
+			if f1 == f2 {
+				valid = true
+				break
+			}
+		}
+		if !valid {
+			return fmt.Errorf("request contains invalid field: %s", f1)
+		}
+	}
+
+	return nil
 }

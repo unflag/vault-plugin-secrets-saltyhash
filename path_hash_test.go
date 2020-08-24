@@ -94,4 +94,9 @@ func TestSalty_Hash(t *testing.T) {
 	req.Path = hashPath + "/sha3-512"
 	req.Data["input"] = ""
 	doRequest(req, true, "")
+
+	// Test input parameter typo
+	req.Path = hashPath + "/sha3-512"
+	req.Data["imput"] = testSecret
+	doRequest(req, true, "")
 }
