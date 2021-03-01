@@ -71,7 +71,7 @@ func (b *backend) pathHashWrite(ctx context.Context, req *logical.Request, data 
 
 	hf, err := hashFunction(algorithm)
 	if err != nil {
-		return logical.ErrorResponse(fmt.Sprintf("unsupported algorithm %s", algorithm)), nil
+		return logical.ErrorResponse(err.Error()), nil
 	}
 
 	salt, _ := base64.StdEncoding.DecodeString(role.Salt)

@@ -66,7 +66,7 @@ func (b *backend) pathHashBatchWrite(ctx context.Context, req *logical.Request, 
 
 	hf, err := hashFunction(algorithm)
 	if err != nil {
-		return logical.ErrorResponse(fmt.Sprintf("unsupported algorithm %s", algorithm)), nil
+		return logical.ErrorResponse(err.Error()), nil
 	}
 
 	salt, _ := base64.StdEncoding.DecodeString(role.Salt)
