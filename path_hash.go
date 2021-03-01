@@ -2,20 +2,16 @@ package saltyhash
 
 import (
 	"context"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
-	"golang.org/x/crypto/sha3"
-	"hash"
 )
 
 const (
-	pathHashHelpSyn = `Generate a hash sum in hex format for input data`
+	pathHashHelpSyn  = `Generate a hash sum in hex format for input data`
 	pathHashHelpDesc = `Generates a hash sum of the given algorithm in hex format against the given input data.`
 )
 
@@ -37,7 +33,7 @@ func (b *backend) pathHash() *framework.Path {
 			},
 
 			"algorithm": {
-				Type:    framework.TypeString,
+				Type: framework.TypeString,
 				Description: `Algorithm to use (POST URL parameter). Valid values are:
 				* sha1
 				* sha2-256
@@ -68,49 +64,29 @@ func (b *backend) pathHashWrite(ctx context.Context, req *logical.Request, data 
 	inputB64 := data.Get("input").(string)
 	algorithm := data.Get("algorithm").(string)
 
+	role, err := b.getRole(ctx, req.Storage, roleName)
+	if err != nil || role == nil {
+		return logical.ErrorResponse(fmt.Sprintf("unable to find role %s: %s", roleName, err)), logical.ErrInvalidRequest
+	}
+
+	hf, err := hashFunction(algorithm)
+	if err != nil {
+		return logical.ErrorResponse(fmt.Sprintf("unsupported algorithm %s", algorithm)), nil
+	}
+
+	salt, _ := base64.StdEncoding.DecodeString(role.Salt)
+
 	input, err := base64.StdEncoding.DecodeString(inputB64)
 	if len(input) == 0 || err != nil {
 		return logical.ErrorResponse(fmt.Sprintf("input either empty or contains invalid base64: %s", err)), logical.ErrInvalidRequest
 	}
 
-	lock := b.roleLock(roleName)
-	lock.RLock()
-	role, err := b.getRole(ctx, req.Storage, roleName)
-	if err != nil || role == nil {
-		return logical.ErrorResponse(fmt.Sprintf("unable to find role %s: %s", roleName, err)), logical.ErrInvalidRequest
-	}
-	lock.RUnlock()
+	input = saltSecret(input, salt, role.Mode)
 
-	mode := role.Mode
-	salt, err := base64.StdEncoding.DecodeString(role.Salt)
+	_, err = hf.Write(input)
 	if err != nil {
-		return logical.ErrorResponse(fmt.Sprintf("unable to decode salt as base64: %s", err)), logical.ErrInvalidRequest
+		return logical.ErrorResponse(fmt.Sprintf("couldn't hash data: %s", err)), logical.ErrInvalidRequest
 	}
-
-	switch mode {
-	case "append":
-		input = append(input, salt...)
-	case "prepend":
-		input = append(salt, input...)
-	}
-
-	var hf hash.Hash
-	switch algorithm {
-	case "sha1":
-		hf = sha1.New()
-	case "sha2-256":
-		hf = sha256.New()
-	case "sha2-512":
-		hf = sha512.New()
-	case "sha3-256":
-		hf = sha3.New256()
-	case "sha3-512":
-		hf = sha3.New512()
-	default:
-		return logical.ErrorResponse(fmt.Sprintf("unsupported algorithm %s", algorithm)), nil
-	}
-
-	hf.Write(input)
 	retBytes := hf.Sum(nil)
 
 	retStr := hex.EncodeToString(retBytes)
