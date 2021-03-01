@@ -33,6 +33,7 @@ func Backend(_ context.Context, _ *logical.BackendConfig) *backend {
 		BackendType: logical.TypeLogical,
 		Paths: []*framework.Path{
 				b.pathHash(),
+				b.pathHashBatch(),
 				b.pathListRoles(),
 				b.pathRoles(),
 		},
