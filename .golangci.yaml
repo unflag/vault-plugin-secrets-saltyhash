@@ -1,0 +1,9 @@
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - errcheck
+    - gosimple
+    - staticcheck
+    - gocritic
+    - interfacer

@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	pathListRolesHelpSyn = `List the existing roles in this backend`
-    pathListRolesHelpDesc = `Roles will be listed by the role name.`
-    pathRoleHelpSyn = `Manage the roles that can be created with this backend.`
-    pathRoleHelpDesc = `This path lets you manage the roles that can be created with this backend.`
+	pathListRolesHelpSyn  = `List the existing roles in this backend`
+	pathListRolesHelpDesc = `Roles will be listed by the role name.`
+	pathRoleHelpSyn       = `Manage the roles that can be created with this backend.`
+	pathRoleHelpDesc      = `This path lets you manage the roles that can be created with this backend.`
 )
 
 type roleEntry struct {
@@ -57,21 +57,27 @@ func (b *backend) pathRoles() *framework.Path {
 				Description: "Name of the role",
 			},
 			"salt": {
-				Type:         framework.TypeString,
-				Description:  "Random base64-encoded string which will be used as an additional input to hash function",
+				Type:        framework.TypeString,
+				Description: "Random base64-encoded string which will be used as an additional input to hash function",
 			},
 			"mode": {
-				Type:         framework.TypeString,
-				Description:  `Order of salt application. Valid values are:
+				Type: framework.TypeString,
+				Description: `Order of salt application. Valid values are:
                 * append
                 * prepend`,
 			},
 		},
 
-		Callbacks: map[logical.Operation]framework.OperationFunc{
-			logical.UpdateOperation: b.pathRoleCreateUpdate,
-			logical.ReadOperation:   b.pathRoleRead,
-			logical.DeleteOperation: b.pathRoleDelete,
+		Operations: map[logical.Operation]framework.OperationHandler{
+			logical.UpdateOperation: &framework.PathOperation{
+				Callback: b.pathRoleCreateUpdate,
+			},
+			logical.ReadOperation: &framework.PathOperation{
+				Callback: b.pathRoleRead,
+			},
+			logical.DeleteOperation: &framework.PathOperation{
+				Callback: b.pathRoleDelete,
+			},
 		},
 
 		HelpSynopsis:    pathRoleHelpSyn,
