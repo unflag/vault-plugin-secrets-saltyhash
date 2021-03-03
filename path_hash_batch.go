@@ -85,9 +85,7 @@ func (b *backend) pathHashBatchWrite(ctx context.Context, req *logical.Request, 
 			return logical.ErrorResponse(fmt.Sprintf("couldn't hash data: %s", err)), logical.ErrInvalidRequest
 		}
 
-		retBytes := hf.Sum(nil)
-		retStr := hex.EncodeToString(retBytes)
-		retVals = append(retVals, retStr)
+		retVals = append(retVals, hex.EncodeToString(hf.Sum(nil)))
 		hf.Reset()
 	}
 

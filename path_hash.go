@@ -87,16 +87,10 @@ func (b *backend) pathHashWrite(ctx context.Context, req *logical.Request, data 
 	if err != nil {
 		return logical.ErrorResponse(fmt.Sprintf("couldn't hash data: %s", err)), logical.ErrInvalidRequest
 	}
-	retBytes := hf.Sum(nil)
 
-	retStr := hex.EncodeToString(retBytes)
-
-	// Generate the response
-	resp := &logical.Response{
+	return &logical.Response{
 		Data: map[string]interface{}{
-			"sum": retStr,
+			"sum": hex.EncodeToString(hf.Sum(nil)),
 		},
-	}
-
-	return resp, nil
+	}, nil
 }
