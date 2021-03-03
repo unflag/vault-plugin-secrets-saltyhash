@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	testRoleName = "test"
-	testSalt = "dGVzdFNhbHQ="
+	testRoleName    = "test"
+	testSalt        = "dGVzdFNhbHQ="
 	testUpdatedSalt = "dGVzdFVwZGF0ZWRTYWx0"
-	testSecret = "dGVzdFNlY3JldA=="
+	testSecret      = "dGVzdFNlY3JldA=="
 )
 
 func createBackendWithStorage(t testing.TB) (*backend, logical.Storage) {
@@ -22,9 +22,6 @@ func createBackendWithStorage(t testing.TB) (*backend, logical.Storage) {
 	config.StorageView = &logical.InmemStorage{}
 
 	b := Backend(context.Background(), config)
-	if b == nil {
-		t.Fatalf("failed to create backend")
-	}
 	err := b.Backend.Setup(context.Background(), config)
 	if err != nil {
 		t.Fatal(err)
