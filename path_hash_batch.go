@@ -38,8 +38,10 @@ func (b *backend) pathHashBatch() *framework.Path {
 			},
 		},
 
-		Callbacks: map[logical.Operation]framework.OperationFunc{
-			logical.UpdateOperation: b.pathHashBatchWrite,
+		Operations: map[logical.Operation]framework.OperationHandler{
+			logical.UpdateOperation: &framework.PathOperation{
+				Callback: b.pathHashBatchWrite,
+			},
 		},
 
 		HelpSynopsis:    pathHashHelpSyn,

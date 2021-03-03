@@ -43,8 +43,10 @@ func (b *backend) pathHash() *framework.Path {
 			},
 		},
 
-		Callbacks: map[logical.Operation]framework.OperationFunc{
-			logical.UpdateOperation: b.pathHashWrite,
+		Operations: map[logical.Operation]framework.OperationHandler{
+			logical.UpdateOperation: &framework.PathOperation{
+				Callback: b.pathHashWrite,
+			},
 		},
 
 		HelpSynopsis:    pathHashHelpSyn,
